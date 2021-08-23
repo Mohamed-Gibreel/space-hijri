@@ -21,13 +21,6 @@ class MyApp extends StatelessWidget {
           const Locale('ar', 'SA'),
         ],
         debugShowCheckedModeBanner: false,
-        theme: new ThemeData(
-            primaryColor: Colors.grey[300],
-            accentColor: Colors.black54,
-            brightness: Brightness.light,
-            backgroundColor: Colors.blue,
-            textTheme: TextTheme(caption: TextStyle(color: Colors.red)),
-            dialogBackgroundColor: Colors.blue),
         home: MyHomePage(title: "Umm Alqura Calendar"));
   }
 }
@@ -53,9 +46,28 @@ class _MyHomePageState extends State<MyHomePage> {
     return input;
   }
 
+  Future<Null> _selectDate(BuildContext context) async {
+    final HijriCalendar? picked = await showHijriDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      lastDate: new HijriCalendar()
+        ..hYear = 1445
+        ..hMonth = 9
+        ..hDay = 25,
+      firstDate: new HijriCalendar()
+        ..hYear = 1438
+        ..hMonth = 12
+        ..hDay = 25,
+      initialDatePickerMode: DatePickerMode.day,
+    );
+    if (picked != null)
+      setState(() {
+        selectedDate = picked;
+      });
+  }
+
   @override
   Widget build(BuildContext context) {
-    // HijriCalendar.setLocal(Localizations.localeOf(context).languageCode);
     HijriCalendar.setLocal("ar");
     return new Scaffold(
       appBar: new AppBar(
@@ -93,6 +105,11 @@ class _MyHomePageState extends State<MyHomePage> {
             selectedDate: selectedDate,
           ),
         ),
+      ),
+      floatingActionButton: new FloatingActionButton(
+        onPressed: () => _selectDate(context),
+        tooltip: 'Pick Date',
+        child: new Icon(Icons.event),
       ),
     );
   }

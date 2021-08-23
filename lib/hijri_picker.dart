@@ -191,7 +191,15 @@ class _DatePickerDialogState extends State<HijriDatePickerDialog> {
               children: <Widget>[
                 header,
                 new Container(
-                  color: theme.dialogBackgroundColor,
+                  decoration: BoxDecoration(
+                    color: theme.dialogBackgroundColor,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      topRight: Radius.circular(10),
+                      bottomLeft: Radius.circular(0),
+                      bottomRight: Radius.circular(0),
+                    ),
+                  ),
                   child: new Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -340,7 +348,7 @@ class _DatePickerHeader extends StatelessWidget {
       height: height,
       // padding: padding,
       // color: backgroundColor,
-      color: Colors.purple,
+      // color: Colors.purple,
       child: new Column(
         mainAxisAlignment: mainAxisAlignment,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -368,15 +376,17 @@ class _DateHeaderButton extends StatelessWidget {
 
     return new Material(
       type: MaterialType.button,
-      color: color,
-      child: new InkWell(
-        borderRadius: kMaterialEdges[MaterialType.button],
-        highlightColor: theme.highlightColor,
-        splashColor: theme.splashColor,
-        onTap: onTap,
-        child: new Container(
-          // padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: child,
+      color: Colors.transparent,
+      child: SingleChildScrollView(
+        child: new InkWell(
+          borderRadius: kMaterialEdges[MaterialType.button],
+          // highlightColor: theme.highlightColor,
+          // splashColor: theme.splashColor,
+          onTap: onTap,
+          child: new Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: child,
+          ),
         ),
       ),
     );
