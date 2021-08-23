@@ -55,7 +55,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    HijriCalendar.setLocal(Localizations.localeOf(context).languageCode);
+    // HijriCalendar.setLocal(Localizations.localeOf(context).languageCode);
+    HijriCalendar.setLocal("ar");
     return new Scaffold(
       appBar: new AppBar(
         title: new Text(widget.title),
@@ -83,10 +84,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 var testVar = replaceFarsiNumber(value.toString());
                 var dateToConvert = testVar.split("/");
                 print(HijriCalendar.now());
-                print(value.hijriToGregorian(
-                    int.parse(dateToConvert[0]),
-                    int.parse(dateToConvert[1]),
-                    int.parse(dateToConvert[2])));
+                print(value.hijriToGregorian(int.parse(dateToConvert[0]),
+                    int.parse(dateToConvert[1]), int.parse(dateToConvert[2])));
                 print('=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-');
                 selectedDate = value;
               });

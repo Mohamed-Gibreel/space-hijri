@@ -397,10 +397,10 @@ class HijriMonthPicker extends StatefulWidget {
     this.selectableDayPredicate,
   })  : assert(
             !firstDate.isAfter(lastDate.hYear, lastDate.hMonth, lastDate.hDay)),
-        /*  assert(selectedDate.isAfter(
-                firstDate.hYear, firstDate.hMonth, firstDate.hDay) ||
-            selectedDate.isAtSameMomentAs(
-                firstDate.hYear, firstDate.hMonth, firstDate.hDay)),*/
+        // assert(selectedDate.isAfter(
+        //         firstDate.hYear, firstDate.hMonth, firstDate.hDay) ||
+        //     selectedDate.isAtSameMomentAs(
+        //         firstDate.hYear, firstDate.hMonth, firstDate.hDay)),
         super(key: key);
 
   /// The currently selected date.
@@ -883,4 +883,152 @@ class HijriDayPicker extends StatelessWidget {
       ],
     );
   }
+}
+
+/// A scrollable list of years to allow picking a year.
+///
+/// The year picker widget is rarely used directly. Instead, consider using
+/// [showDatePicker], which creates a date picker dialog.
+///
+/// Requires one of its ancestors to be a [Material] widget.
+///
+/// See also:
+///
+///  * [showDatePicker]
+///  * <https://material.google.com/components/pickers.html#pickers-date-pickers>
+class HijriYearPicker extends StatefulWidget {
+  /// Creates a year picker.
+  ///
+  /// The [selectedDate] and [onChanged] arguments must not be null. The
+  /// [lastDate] must be after the [firstDate].
+  ///
+  /// Rarely used directly. Instead, typically used as part of the dialog shown
+  /// by [showDatePicker].
+  HijriYearPicker({
+    Key? key,
+    required this.selectedDate,
+    required this.onChanged,
+    required this.firstDate,
+    required this.lastDate,
+  })  : assert(
+            !firstDate.isAfter(lastDate.hYear, lastDate.hMonth, lastDate.hDay)),
+        super(key: key);
+
+  /// The currently selected date.
+  ///
+  /// This date is highlighted in the picker.
+  final HijriCalendar selectedDate;
+
+  /// Called when the user picks a year.
+  final ValueChanged<HijriCalendar> onChanged;
+
+  /// The earliest date the user is permitted to pick.
+  final HijriCalendar firstDate;
+
+  /// The latest date the user is permitted to pick.
+  final HijriCalendar lastDate;
+
+  @override
+  _HijriYearPickerState createState() => new _HijriYearPickerState();
+}
+
+class _HijriYearPickerState extends State<HijriYearPicker> {
+  static const double _itemExtent = 50.0;
+  late ScrollController scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    scrollController = new ScrollController(
+      // Move the initial scroll position to the currently selected date's year.
+      initialScrollOffset:
+          (widget.selectedDate.hYear - widget.firstDate.hYear) * _itemExtent,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    assert(debugCheckHasMaterial(context));
+
+    final ThemeData themeData = Theme.of(context);
+    final TextStyle? style = themeData.textTheme.bodyText2;
+    return new ListView.builder(
+      controller: scrollController,
+      itemExtent: _itemExtent,
+      itemCount: widget.lastDate.hYear - widget.firstDate.hYear + 1,
+      itemBuilder: (BuildContext context, int index) {
+        final int year = widget.firstDate.hYear + index;
+        final bool isSelected = year == widget.selectedDate.hYear;
+        final TextStyle? itemStyle = isSelected
+            ? themeData.textTheme.headline5
+                ?.copyWith(color: themeData.accentColor)
+            : style;
+        return new InkWell(
+          key: new ValueKey<int>(year),
+          onTap: () {
+            // year, widget.selectedDate.hMonth, widget.selectedDate.hMonth
+            widget.onChanged(new HijriCalendar()
+              ..hYear = year
+              ..hMonth = widget.selectedDate.hMonth
+              ..hDay = widget.selectedDate.hDay);
+          },
+          child: new Center(
+            child: new Semantics(
+              selected: isSelected,
+              child: new Text(year.toString(), style: itemStyle),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+Future<HijriCalendar?> showHijriDatePicker({
+  required BuildContext context,
+  required HijriCalendar initialDate,
+  required HijriCalendar firstDate,
+  required HijriCalendar lastDate,
+  SelectableDayPredicate? selectableDayPredicate,
+  DatePickerMode initialDatePickerMode: DatePickerMode.day,
+  Locale? locale,
+  TextDirection? textDirection,
+}) async {
+  assert(
+      !initialDate.isBefore(firstDate.hYear, firstDate.hMonth, firstDate.hDay),
+      'initialDate must be on or after firstDate');
+  assert(!initialDate.isAfter(lastDate.hYear, lastDate.hMonth, lastDate.hDay),
+      'initialDate must be on or before lastDate');
+  assert(!firstDate.isAfter(lastDate.hYear, lastDate.hMonth, lastDate.hDay),
+      'lastDate must be on or after firstDate');
+  assert(selectableDayPredicate == null || selectableDayPredicate(initialDate),
+      'Provided initialDate must satisfy provided selectableDayPredicate');
+
+  Widget child = new HijriDatePickerDialog(
+    initialDate: initialDate,
+    firstDate: firstDate,
+    lastDate: lastDate,
+    selectableDayPredicate: selectableDayPredicate,
+    initialDatePickerMode: initialDatePickerMode,
+  );
+
+  if (textDirection != null) {
+    child = new Directionality(
+      textDirection: textDirection,
+      child: child,
+    );
+  }
+
+  if (locale != null) {
+    child = new Localizations.override(
+      context: context,
+      locale: locale,
+      child: child,
+    );
+  }
+
+  return showDialog<HijriCalendar>(
+    context: context,
+    builder: (BuildContext context) => child,
+  );
 }
